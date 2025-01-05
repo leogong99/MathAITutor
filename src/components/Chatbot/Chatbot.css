@@ -1,18 +1,29 @@
 .chatbot-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 100px);
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  height: calc(100vh - 64px);
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
+  background-color: white;
 }
 
 .chat-messages {
-  flex-grow: 1;
+  flex: 1;
   overflow-y: auto;
-  padding: 20px;
-  background-color: #f8f9fa;
+  padding: 1rem;
+  margin-bottom: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add this new class for the messages wrapper */
+.messages-wrapper {
+  flex: 1;
+  min-height: 0; /* Important for proper scrolling */
 }
 
 /* Simplified scrollbar */
@@ -38,11 +49,12 @@
 }
 
 .suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  position: sticky;
+  bottom: 0;
+  background-color: white;
   padding: 12px;
-  justify-content: center;
+  border-top: 1px solid #eee;
+  margin-top: auto;
 }
 
 .suggestion-button {
@@ -64,4 +76,13 @@
 
 .suggestion-button:active {
   transform: translateY(0);
+}
+
+/* Ensure input stays at bottom */
+.chat-input-container {
+  position: sticky;
+  bottom: 0;
+  background-color: white;
+  padding: 1rem;
+  border-top: 1px solid #eee;
 } 

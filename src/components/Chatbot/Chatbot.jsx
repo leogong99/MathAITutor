@@ -26,6 +26,7 @@ const Chatbot = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const chatEndRef = useRef(null);
+  const [conversationContext, setConversationContext] = useState([]);
 
   const {
     transcript,
@@ -68,13 +69,27 @@ const Chatbot = () => {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    handleSubmit(suggestion);
+    // Get the last question and its response
+    const recentContext = messages
+      .slice(-2) // Get last two messages (user question and bot response)
+      .map(msg => msg.text)
+      .join('\n');
+
+    const contextualizedQuestion = `Previous context:\n${recentContext}\n\nFollow-up request: ${suggestion}`;
+    handleSubmit(contextualizedQuestion, null, false);
     setShowSuggestions(false);
   };
 
-  const handleSubmit = async (text, image) => {
+  const handleSubmit = async (text, image, isNewQuestion = true) => {
+    // Update conversation context
+    if (!text.startsWith('Previous context:')) {
+      setConversationContext(prev => [...prev, text]);
+    }
+
     const userMessage = {
-      text: text || (image ? "Uploaded an image" : ""),
+      text: text.startsWith('Previous context:') 
+        ? text.split('\n\nFollow-up request: ')[1] // Show only the follow-up part to user
+        : text,
       image: image ? URL.createObjectURL(image) : null,
       sender: 'user'
     };
@@ -100,7 +115,8 @@ const Chatbot = () => {
         });
       } else {
         response = await axios.post(`${API_URL}/api/chat`, {
-          message: text
+          message: text,
+          context: conversationContext.slice(-3)
         });
       }
       
@@ -108,7 +124,7 @@ const Chatbot = () => {
         text: response.data.message,
         sender: 'bot'
       }]);
-      setShowSuggestions(true);
+      setShowSuggestions(isNewQuestion);
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error.response?.data?.error || "Sorry, I had trouble understanding that. Could you try asking again?";
@@ -129,26 +145,28 @@ const Chatbot = () => {
   return (
     <div className="chatbot-container">
       <div className="chat-messages">
-        {messages.map((message, index) => (
-          <ChatMessage key={index} message={message} />
-        ))}
-        {isLoading && (
-          <ChatMessage message={{ text: "Thinking...", sender: "bot" }} />
-        )}
-        {showSuggestions && !isLoading && messages.length > 0 && (
-          <div className="suggestions">
-            {FOLLOW_UP_SUGGESTIONS.default.map((suggestion, index) => (
-              <button
-                key={index}
-                className="suggestion-button"
-                onClick={() => handleSuggestionClick(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        )}
-        <div ref={chatEndRef} />
+        <div className="messages-wrapper">
+          {messages.map((message, index) => (
+            <ChatMessage key={index} message={message} />
+          ))}
+          {isLoading && (
+            <ChatMessage message={{ text: "Thinking...", sender: "bot" }} />
+          )}
+          <div ref={chatEndRef} />
+          {showSuggestions && !isLoading && messages.length > 0 && (
+            <div className="suggestions">
+              {FOLLOW_UP_SUGGESTIONS.default.map((suggestion, index) => (
+                <button
+                  key={index}
+                  className="suggestion-button"
+                  onClick={() => handleSuggestionClick(`With above problem, ${suggestion}`)}
+                >
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <ChatInput
