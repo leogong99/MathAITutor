@@ -5,7 +5,7 @@ import ChatMessage from '../ChatMessage/ChatMessage.jsx';
 import ChatInput from '../ChatInput/ChatInput.jsx';
 import './Chatbot.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = `${window.location.protocol}//${window.location.hostname}:3001`;
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
@@ -114,7 +114,8 @@ const Chatbot = () => {
           },
         });
       } else {
-        response = await axios.post(`${API_URL}/api/chat`, {
+        console.log(`${API_URL}/api/chat`);
+        response = await axios.post(`${API_URL}/api/chat`,{
           message: text,
           context: conversationContext.slice(-3)
         });
