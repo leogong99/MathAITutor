@@ -5,7 +5,7 @@ import ChatMessage from '../ChatMessage/ChatMessage.jsx';
 import ChatInput from '../ChatInput/ChatInput.jsx';
 import './Chatbot.css';
 
-const API_URL = `${window.location.protocol}//${window.location.hostname}:3001`;
+const API_URL = `https://mathaitutor-675937690896.us-central1.run.app:8080`;
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
