@@ -28,7 +28,8 @@
     "jest-environment-jsdom": "^29.0.0"
   },
   "scripts": {
-    "start": "react-scripts start & cd server && yarn start",
+    "start_server": "PORT=8081 cd server && yarn start",
+    "start": "PORT=8080 react-scripts start &  yarn start_server",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "test:coverage": "react-scripts test --coverage --watchAll=false",
