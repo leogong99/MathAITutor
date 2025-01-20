@@ -114,7 +114,7 @@ const Chatbot = () => {
           },
         });
       } else {
-        console.log(`${API_URL}/api/chat`);
+        console.log("testing", `${API_URL}/api/chat`);
         response = await axios.post(`${API_URL}/api/chat`,{
           message: text,
           context: conversationContext.slice(-3)
