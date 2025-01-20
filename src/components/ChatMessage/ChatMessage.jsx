@@ -11,7 +11,7 @@ const ChatMessage = ({ message }) => {
             <img src={image} alt="Uploaded" />
           </div>
         )}
-        {text}
+        <pre>{text}</pre>
       </div>
     </div>
   );

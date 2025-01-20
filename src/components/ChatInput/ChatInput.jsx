@@ -9,6 +9,11 @@ const ChatInput = ({ onSubmit, onVoiceInput, isListening, showVoiceInput }) => {
   const fileInputRef = useRef(null);
 
   const handleSubmit = async (e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault(); // Prevent default form submission
+      return;
+    }
+
     e.preventDefault();
     if (!input.trim() && !selectedImage) return;
     
@@ -34,10 +39,11 @@ const ChatInput = ({ onSubmit, onVoiceInput, isListening, showVoiceInput }) => {
     }
   };
 
+
   return (
     <form onSubmit={handleSubmit} className="input-form">
       <div className="input-container">
-        <input
+        <textarea
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}

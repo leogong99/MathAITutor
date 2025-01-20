@@ -23,7 +23,6 @@ const FOLLOW_UP_SUGGESTIONS = {
 const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const chatEndRef = useRef(null);
   const [conversationContext, setConversationContext] = useState([]);
