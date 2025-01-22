@@ -24,6 +24,8 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [voiceInputEnd, setVoiceInputEnd] = useState(false);
+  const [transcriptSubmitted, setTranscriptSubmitted] = useState(false);
   const chatEndRef = useRef(null);
   const [conversationContext, setConversationContext] = useState([]);
 
@@ -58,10 +60,11 @@ const Chatbot = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (transcript) {
+    if (transcript && voiceInputEnd && !transcriptSubmitted) {
       handleSubmit(transcript);
+      setTranscriptSubmitted(true);
     }
-  }, [transcript]);
+  }, [transcript, voiceInputEnd, transcriptSubmitted]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -138,9 +141,18 @@ const Chatbot = () => {
   };
 
   const startListening = () => {
+    setVoiceInputEnd(false);
+    setTranscriptSubmitted(false);
     resetTranscript();
     SpeechRecognition.startListening();
   };
+
+  const endListening = () => {
+    setTimeout(() => {
+      setVoiceInputEnd(true);
+      SpeechRecognition.stopListening();
+    }, 500); // Add a delay of 500ms before stopping the listening
+  }
 
   return (
     <div className="chatbot-container">
@@ -172,6 +184,7 @@ const Chatbot = () => {
       <ChatInput
         onSubmit={handleSubmit}
         onVoiceInput={startListening}
+        endVoiceInput={endListening}
         isListening={listening}
         showVoiceInput={browserSupportsSpeechRecognition}
       />
@@ -179,4 +192,4 @@ const Chatbot = () => {
   );
 };
 
-export default Chatbot; 
+export default Chatbot;

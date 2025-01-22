@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import ImageUpload from '../ImageUpload/ImageUpload';
 import './ChatInput.css';
 
-const ChatInput = ({ onSubmit, onVoiceInput, isListening, showVoiceInput }) => {
+const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoiceInput }) => {
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -62,7 +62,10 @@ const ChatInput = ({ onSubmit, onVoiceInput, isListening, showVoiceInput }) => {
         {showVoiceInput && (
           <button
             type="button"
-            onClick={onVoiceInput}
+            onTouchStart={onVoiceInput}
+            onMouseDown={onVoiceInput}
+            onTouchEnd={endVoiceInput}
+            onMouseUp={endVoiceInput}
             className={`voice-button ${isListening ? 'listening' : ''}`}
           >
             🎤
