@@ -13,6 +13,15 @@
   align-items: center;
 }
 
+.app-header-title {
+  display: flex;
+}
+
+.App-header .logo {
+  width: 47px;
+  margin-right: 10px;
+}
+
 .App-header h1 {
   color: #fff;
   font-size: 2.5rem;
