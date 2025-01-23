@@ -151,7 +151,7 @@ const Chatbot = () => {
     setTimeout(() => {
       setVoiceInputEnd(true);
       SpeechRecognition.stopListening();
-    }, 500); // Add a delay of 500ms before stopping the listening
+    }, 1000); // Add a delay of 1000ms before stopping the listening
   }
 
   return (

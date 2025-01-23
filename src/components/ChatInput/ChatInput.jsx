@@ -50,13 +50,9 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           placeholder={selectedImage ? "Ask about the image..." : "Ask me any math question!"}
           className="message-input"
         />
-        <ImageUpload 
-          onImageSelect={handleImageSelect}
-          isUploading={isUploading}
-          selectedImage={selectedImage}
-          onClearImage={handleClearImage}
-          fileInputRef={fileInputRef}
-        />
+        <button type="submit" className="send-button" disabled={isUploading}>
+          Send
+        </button>
       </div>
       <div className="button-container">
         {showVoiceInput && (
@@ -71,9 +67,14 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
             🎤
           </button>
         )}
-        <button type="submit" className="send-button" disabled={isUploading}>
-          Send
-        </button>
+        <ImageUpload 
+          onImageSelect={handleImageSelect}
+          isUploading={isUploading}
+          selectedImage={selectedImage}
+          onClearImage={handleClearImage}
+          fileInputRef={fileInputRef}
+        />
+        
       </div>
     </form>
   );
