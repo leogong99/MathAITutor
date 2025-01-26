@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import './ImageUpload.css';
 
-const ImageUpload = ({ onImageSelect, isUploading, selectedImage, onClearImage, fileInputRef }) => {
+const ImageUpload = ({ onImageSelect, isUploading, selectedImage, onClearImage, fileInputRef, disabled }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ const ImageUpload = ({ onImageSelect, isUploading, selectedImage, onClearImage, 
           type="button"
           onClick={handleClick}
           className={`upload-button ${isUploading ? 'uploading' : ''}`}
-          disabled={isUploading}
+          disabled={disabled|| isUploading}
         >
           {isUploading ? '📤 Uploading...' : '📷 Add Image'}
         </button>

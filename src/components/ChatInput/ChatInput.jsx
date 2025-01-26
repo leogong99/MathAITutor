@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import ImageUpload from '../ImageUpload/ImageUpload';
 import './ChatInput.css';
 
-const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoiceInput }) => {
+const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoiceInput, disabled }) => {
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -54,7 +54,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           className="message-input"
           onKeyDown={handleEnter}
         />
-        <button type="submit" className="send-button" disabled={isUploading}>
+        <button type="submit" className="send-button" disabled={disabled || isUploading}>
           Send
         </button>
       </div>
@@ -66,6 +66,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
             onMouseDown={onVoiceInput}
             onTouchEnd={endVoiceInput}
             onMouseUp={endVoiceInput}
+            disabled={disabled}
             className={`voice-button ${isListening ? 'listening' : ''}`}
           >
             🎤
@@ -77,6 +78,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           selectedImage={selectedImage}
           onClearImage={handleClearImage}
           fileInputRef={fileInputRef}
+          disabled={disabled}
         />
         
       </div>

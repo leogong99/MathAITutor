@@ -1,7 +1,7 @@
 .chatbot-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 119px);
+  height: calc(100% - 88px);
   top: 64px;
   left: 0;
   right: 0;

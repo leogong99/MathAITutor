@@ -208,6 +208,7 @@ const Chatbot = ({authToken}) => {
         onVoiceInput={startListening}
         endVoiceInput={endListening}
         isListening={listening}
+        disabled={!authToken}
         showVoiceInput={browserSupportsSpeechRecognition}
       />
     </div>
