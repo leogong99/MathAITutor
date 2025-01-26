@@ -3,13 +3,24 @@ import Home from './components/Home/Home';
 import Chatbot from './components/Chatbot/Chatbot';
 import './App.css';
 import { GoogleLogin } from '@react-oauth/google';
+import { useState } from 'react';
 
 
 import logo from './images/logo.png';
 
 function App() {
+  const [authToken, setAuthToken] = useState(null);
+
+  const savedToken = localStorage.getItem('authToken');
+  if (authToken === null) {
+    setAuthToken(savedToken);
+  }
+
   const responseMessage = (response) => {
     console.log(response);
+    const idToken = response.credential;
+    localStorage.setItem('authToken', idToken);
+    setAuthToken(idToken);
   };
   const errorMessage = (error) => {
       console.log(error);
@@ -31,7 +42,7 @@ function App() {
         <main>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/chat" element={<Chatbot />} />
+            <Route path="/chat" element={<Chatbot authToken={authToken} />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </main>

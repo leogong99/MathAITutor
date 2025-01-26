@@ -8,11 +8,14 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
 
+  const handleEnter = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); 
+      handleSubmit(e)
+    } 
+  }
+
   const handleSubmit = async (e) => {
-    if (e.key === 'Enter' && e.shiftKey) {
-      e.preventDefault(); // Prevent default form submission
-      return;
-    }
 
     e.preventDefault();
     if (!input.trim() && !selectedImage) return;
@@ -49,6 +52,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           onChange={(e) => setInput(e.target.value)}
           placeholder={selectedImage ? "Ask about the image..." : "Ask me any math question!"}
           className="message-input"
+          onKeyDown={handleEnter}
         />
         <button type="submit" className="send-button" disabled={isUploading}>
           Send

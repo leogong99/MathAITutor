@@ -20,7 +20,7 @@ const FOLLOW_UP_SUGGESTIONS = {
   ]
 };
 
-const Chatbot = () => {
+const Chatbot = ({authToken}) => {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -64,7 +64,7 @@ const Chatbot = () => {
       handleSubmit(transcript);
       setTranscriptSubmitted(true);
     }
-  }, [transcript, voiceInputEnd, transcriptSubmitted]);
+  }, [transcript, voiceInputEnd, transcriptSubmitted, authToken]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -102,6 +102,16 @@ const Chatbot = () => {
 
     try {
       let response;
+
+      if(!authToken) {
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${authToken}`
+      };
+
+
       if (image) {
         const formData = new FormData();
         formData.append('image', image);
@@ -112,14 +122,23 @@ const Chatbot = () => {
         console.log('Sending image:', image);
         response = await axios.post(`${API_URL}/api/chat/with-image`, formData, {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            ...headers,
+            'Content-Type': 'multipart/form-data'
           },
+        })
+        .catch(err => {
+          console.error('Service call error:', err);
+          return;
         });
       } else {
         console.log("testing", `${API_URL}/api/chat`);
         response = await axios.post(`${API_URL}/api/chat`,{
           message: text,
           context: conversationContext.slice(-3)
+        }, {headers})
+        .catch(err => {
+          console.error('Service call error:', err);
+          return;
         });
       }
       
@@ -161,6 +180,9 @@ const Chatbot = () => {
           {messages.map((message, index) => (
             <ChatMessage key={index} message={message} />
           ))}
+          {!authToken && (
+            <ChatMessage message={{ text: "Please login to continue", sender: "bot" }} />
+          )}
           {isLoading && (
             <ChatMessage message={{ text: "Thinking...", sender: "bot" }} />
           )}
