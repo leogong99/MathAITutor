@@ -12,7 +12,7 @@ function App() {
   const [authToken, setAuthToken] = useState(null);
 
   const savedToken = localStorage.getItem('authToken');
-  if (authToken === null) {
+  if (authToken === null && savedToken) {
     setAuthToken(savedToken);
   }
 
