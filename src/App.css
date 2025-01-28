@@ -11,6 +11,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  z-index: 2;
 }
 
 .app-header-title {
@@ -47,14 +49,46 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.hamburger-menu {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
 main {
   padding: 20px;
   max-width: 800px;
+  height: calc(100% - 120px);
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   .App-header h1 {
     font-size: 1.5rem;
+    line-height: 47px;
   }
-} 
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #2196F3;
+    width: 100%;
+    text-align: right;
+    padding: 1rem;
+    align-items: end;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .hamburger-menu {
+    display: block;
+  }
+}

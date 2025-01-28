@@ -5,11 +5,11 @@ import './App.css';
 import { GoogleLogin } from '@react-oauth/google';
 import { useState } from 'react';
 
-
 import logo from './images/logo.png';
 
 function App() {
   const [authToken, setAuthToken] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const savedToken = localStorage.getItem('authToken');
   if (authToken === null && savedToken) {
@@ -22,9 +22,15 @@ function App() {
     localStorage.setItem('authToken', idToken);
     setAuthToken(idToken);
   };
+
   const errorMessage = (error) => {
-      console.log(error);
+    console.log(error);
   };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   return (
     <Router>
       <div className="App">
@@ -33,11 +39,14 @@ function App() {
             <img src={logo} alt="logo" className='logo'/>
             <h1>Math Buddy</h1>
           </div>
-          <nav className="nav-links">
-            <Link to="/" className="nav-link">Home</Link>
-            <Link to="/chat" className="nav-link">Chat</Link>
+          <nav className={`nav-links ${isMobileMenuOpen ? 'open' : ''}`}>
+            <Link to="/" className="nav-link" onClick={toggleMobileMenu}>Home</Link>
+            <Link to="/chat" className="nav-link" onClick={toggleMobileMenu}>Chat</Link>
             <GoogleLogin onSuccess={responseMessage} onError={errorMessage} />
-            </nav>
+          </nav>
+          <button className="hamburger-menu" onClick={toggleMobileMenu}>
+            ☰
+          </button>
         </header>
         <main>
           <Routes>
@@ -51,4 +60,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;
