@@ -1,34 +1,55 @@
 .App {
   text-align: center;
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background: linear-gradient(135deg, #f6f9fc 0%, #e8f4f8 100%);
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .App-header {
-  background-color: #2196F3;
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
   padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   z-index: 2;
+  animation: headerSlideDown 0.5s ease-out;
+}
+
+@keyframes headerSlideDown {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
 }
 
 .app-header-title {
   display: flex;
+  align-items: center;
 }
 
 .App-header .logo {
   width: 47px;
   margin-right: 10px;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .App-header h1 {
   color: #fff;
   font-size: 2.5rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
   margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .nav-links {
@@ -41,12 +62,16 @@
   text-decoration: none;
   font-size: 1.1rem;
   padding: 8px 16px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
 }
 
 .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .hamburger-menu {
@@ -56,6 +81,11 @@
   color: white;
   font-size: 2rem;
   cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.hamburger-menu:hover {
+  transform: scale(1.1);
 }
 
 main {
@@ -63,6 +93,12 @@ main {
   max-width: 800px;
   height: calc(100% - 120px);
   margin: 0 auto;
+  animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (max-width: 768px) {
@@ -77,11 +113,17 @@ main {
     position: absolute;
     top: 100%;
     right: 0;
-    background-color: #2196F3;
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
     width: 100%;
     text-align: right;
     padding: 1rem;
     align-items: end;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 
   .nav-links.open {
