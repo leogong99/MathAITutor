@@ -2,6 +2,9 @@
   "name": "math-learning-chatbot",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
     "@testing-library/jest-dom": "^5.16.5",
