@@ -16,12 +16,12 @@ const MathExpression = ({ text }) => {
       {parts.map((part, index) => {
         // Check if the part is a math expression
         if (part.startsWith('\\[') && part.endsWith('\\]')) {
-          // Remove the \[ and \] delimiters
-          const math = part.slice(2, -2);
+          // Remove the \[ and \] delimiters and fix text commands
+          const math = part.slice(2, -2).replace(/text{/g, '\\text{');
           return <BlockMath key={index} math={math} />;
         } else if (part.startsWith('\\(') && part.endsWith('\\)')) {
-          // Remove the \( and \) delimiters
-          const math = part.slice(2, -2);
+          // Remove the \( and \) delimiters and fix text commands
+          const math = part.slice(2, -2).replace(/text{/g, '\\text{');
           return <InlineMath key={index} math={math} />;
         } else {
           // Replace any remaining escaped characters

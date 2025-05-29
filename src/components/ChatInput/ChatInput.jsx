@@ -6,6 +6,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
   const [input, setInput] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleEnter = (e) => {
@@ -16,19 +17,27 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
   }
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
     if (!input.trim() && !selectedImage) return;
     
-    setIsUploading(true);
-    await onSubmit(input, selectedImage);
+    // Clear input immediately
+    const currentInput = input;
     setInput('');
+    
+    setIsWaitingForResponse(true);
+    // Only set isUploading to true if there's an image
+    if (selectedImage) {
+      setIsUploading(true);
+    }
+    
+    await onSubmit(currentInput, selectedImage);
     setSelectedImage(null);
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
     setIsUploading(false);
+    setIsWaitingForResponse(false);
   };
 
   const handleImageSelect = (file) => {
@@ -42,6 +51,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
     }
   };
 
+  const isDisabled = disabled || isWaitingForResponse;
 
   return (
     <form onSubmit={handleSubmit} className="input-form">
@@ -53,8 +63,9 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           placeholder={selectedImage ? "Ask about the image..." : "Ask me any math question!"}
           className="message-input"
           onKeyDown={handleEnter}
+          disabled={isDisabled}
         />
-        <button type="submit" className="send-button" disabled={disabled || isUploading}>
+        <button type="submit" className="send-button" disabled={isDisabled || isUploading}>
           Send
         </button>
       </div>
@@ -66,7 +77,7 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
             onMouseDown={onVoiceInput}
             onTouchEnd={endVoiceInput}
             onMouseUp={endVoiceInput}
-            disabled={disabled}
+            disabled={isDisabled}
             className={`voice-button ${isListening ? 'listening' : ''}`}
           >
             🎤
@@ -78,9 +89,8 @@ const ChatInput = ({ onSubmit, onVoiceInput, endVoiceInput, isListening, showVoi
           selectedImage={selectedImage}
           onClearImage={handleClearImage}
           fileInputRef={fileInputRef}
-          disabled={disabled}
+          disabled={isDisabled}
         />
-        
       </div>
     </form>
   );
