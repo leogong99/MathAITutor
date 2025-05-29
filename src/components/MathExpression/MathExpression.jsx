@@ -4,9 +4,12 @@ import 'katex/dist/katex.min.css';
 import './MathExpression.css';
 
 const MathExpression = ({ text }) => {
+  // First, replace escaped newlines with actual newlines
+  const processedText = text.replace(/\\n/g, '\n');
+
   // Split the text by math expressions
   // eslint-disable-next-line no-useless-escape
-  const parts = text.split(/(\\[\[\(].*?\\[\]\)])/g);
+  const parts = processedText.split(/(\\\[.*?\\\]|\\\(.*?\\\))/g);
 
   return (
     <div className="math-expression">
@@ -21,7 +24,14 @@ const MathExpression = ({ text }) => {
           const math = part.slice(2, -2);
           return <InlineMath key={index} math={math} />;
         } else {
-          return <span key={index}>{part}</span>;
+          // Replace any remaining escaped characters
+          const cleanText = part
+            .replace(/\\,/g, ',')
+            .replace(/\\text/g, 'text')
+            .replace(/\\,/g, ',')
+            .replace(/\\,/g, ',')
+            .replace(/\\,/g, ',');
+          return <span key={index}>{cleanText}</span>;
         }
       })}
     </div>
