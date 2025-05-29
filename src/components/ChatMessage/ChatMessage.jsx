@@ -1,4 +1,5 @@
 import './ChatMessage.css';
+import MathExpression from '../MathExpression/MathExpression';
 
 const ChatMessage = ({ message }) => {
   const { text, sender, image } = message;
@@ -11,7 +12,7 @@ const ChatMessage = ({ message }) => {
             <img src={image} alt="Uploaded" />
           </div>
         )}
-        <pre>{text}</pre>
+        <MathExpression text={text} />
       </div>
     </div>
   );
