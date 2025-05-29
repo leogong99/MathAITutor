@@ -31,7 +31,7 @@ const MathExpression = ({ text }) => {
             .replace(/\\,/g, ',')
             .replace(/\\,/g, ',')
             .replace(/\\,/g, ',');
-          return <span key={index}>{cleanText}</span>;
+          return <pre key={index}>{cleanText}</pre>;
         }
       })}
     </div>
