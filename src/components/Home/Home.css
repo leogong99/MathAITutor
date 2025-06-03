@@ -143,6 +143,55 @@
   box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
 }
 
+.login-message {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin: 20px auto;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.5s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.login-message p {
+  margin: 0;
+  color: #4CAF50;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.login-emoji {
+  font-size: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.start-button.disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.start-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 @media (max-width: 768px) {
   .hero h1 {
     font-size: 2.2rem;

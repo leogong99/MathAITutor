@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
 import './Home.css';
 
-const Home = () => {
+const Home = ({ isLoggedIn }) => {
   return (
     <div className="home">
       <div className="hero">
         <h1>Welcome to Math Buddy</h1>
         <p className="subtitle">Your Personal AI Math Tutor</p>
+        {!isLoggedIn && (
+          <div className="login-message">
+            <p>Please log in to start learning with Math Buddy!</p>
+            <div className="login-emoji">🔒</div>
+          </div>
+        )}
       </div>
       
       <div className="features">
@@ -36,8 +42,8 @@ const Home = () => {
       </div>
 
       <div className="cta">
-        <Link to="/chat" className="start-button">
-          Start Learning
+        <Link to="/chat" className={`start-button ${!isLoggedIn ? 'disabled' : ''}`}>
+          {isLoggedIn ? 'Start Learning' : 'Login to Start'}
         </Link>
       </div>
     </div>

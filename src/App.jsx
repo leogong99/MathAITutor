@@ -80,7 +80,7 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home isLoggedIn={!!authToken} />} />
             <Route 
               path="/chat" 
               element={
@@ -91,7 +91,7 @@ function App() {
                 )
               } 
             />
-            <Route path="*" element={<Home />} />
+            <Route path="*" element={<Home isLoggedIn={!!authToken} />} />
           </Routes>
         </main>
       </div>
