@@ -19,25 +19,37 @@ const Home = ({ isLoggedIn }) => {
         <div className="feature-card">
           <div className="feature-icon">📝</div>
           <h3>Solve Math Problems</h3>
-          <p>Get step-by-step solutions for any math problem</p>
+          <p>Get step-by-step solutions for any math problem with our friendly AI tutor</p>
         </div>
         
         <div className="feature-card">
           <div className="feature-icon">📷</div>
           <h3>Image Recognition</h3>
-          <p>Upload photos of math problems for instant help</p>
+          <p>Upload photos of math problems for instant help and visual explanations</p>
         </div>
         
         <div className="feature-card">
           <div className="feature-icon">🎯</div>
           <h3>Learn Concepts</h3>
-          <p>Understand mathematical concepts with clear explanations</p>
+          <p>Understand mathematical concepts with clear explanations and interactive tools</p>
         </div>
         
         <div className="feature-card">
-          <div className="feature-icon">🔄</div>
-          <h3>Practice Similar Problems</h3>
-          <p>Get personalized practice problems to reinforce your learning</p>
+          <div className="feature-icon">🛠️</div>
+          <h3>Math Tools</h3>
+          <p>Use our built-in calculator and drawing board to work through problems</p>
+        </div>
+        
+        <div className="feature-card">
+          <div className="feature-icon">🏆</div>
+          <h3>Track Progress</h3>
+          <p>Earn points, badges, and level up as you master different math topics</p>
+        </div>
+        
+        <div className="feature-card">
+          <div className="feature-icon">🎮</div>
+          <h3>Fun Learning</h3>
+          <p>Learn with our friendly mascot and engaging animations that make math fun</p>
         </div>
       </div>
 

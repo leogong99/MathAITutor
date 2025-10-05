@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Home from './components/Home/Home';
 import Chatbot from './components/Chatbot/Chatbot';
+import MobileOptimizations from './components/MobileOptimizations/MobileOptimizations';
 import './App.css';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useState, useEffect } from 'react';
 import logo from './images/logo.png';
 
@@ -49,53 +50,56 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-          <div className="app-header-title">
-            <img src={logo} alt="logo" className='logo'/>
-            <h1>Math Buddy</h1>
-          </div>
-          <nav className={`nav-links ${isMobileMenuOpen ? 'open' : ''}`}>
-            <Link to="/" className="nav-link" onClick={toggleMobileMenu}>Home</Link>
-            <Link to="/chat" className="nav-link" onClick={toggleMobileMenu}>Chat</Link>
-            {authToken ? (
-              <button className="nav-link logout-button" onClick={handleLogout}>
-                Logout
-              </button>
-            ) : (
-              <GoogleLogin 
-                onSuccess={responseMessage} 
-                onError={errorMessage}
-                theme="filled_blue"
-                shape="pill"
-                text="signin_with"
-                size="large"
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-client-id-here'}>
+      <Router>
+        <div className="App">
+          <MobileOptimizations />
+          <header className="App-header">
+            <div className="app-header-title">
+              <img src={logo} alt="logo" className='logo'/>
+              <h1>Math Buddy</h1>
+            </div>
+            <nav className={`nav-links ${isMobileMenuOpen ? 'open' : ''}`}>
+              <Link to="/" className="nav-link" onClick={toggleMobileMenu}>Home</Link>
+              <Link to="/chat" className="nav-link" onClick={toggleMobileMenu}>Chat</Link>
+              {authToken ? (
+                <button className="nav-link logout-button" onClick={handleLogout}>
+                  Logout
+                </button>
+              ) : (
+                <GoogleLogin 
+                  onSuccess={responseMessage} 
+                  onError={errorMessage}
+                  theme="filled_blue"
+                  shape="pill"
+                  text="signin_with"
+                  size="large"
+                />
+              )}
+            </nav>
+            <button className="hamburger-menu" onClick={toggleMobileMenu}>
+              ☰
+            </button>
+          </header>
+          <main>
+            <Routes>
+              <Route path="/" element={<Home isLoggedIn={!!authToken} />} />
+              <Route 
+                path="/chat" 
+                element={
+                  authToken ? (
+                    <Chatbot authToken={authToken} />
+                  ) : (
+                    <Navigate to="/" replace />
+                  )
+                } 
               />
-            )}
-          </nav>
-          <button className="hamburger-menu" onClick={toggleMobileMenu}>
-            ☰
-          </button>
-        </header>
-        <main>
-          <Routes>
-            <Route path="/" element={<Home isLoggedIn={!!authToken} />} />
-            <Route 
-              path="/chat" 
-              element={
-                authToken ? (
-                  <Chatbot authToken={authToken} />
-                ) : (
-                  <Navigate to="/" replace />
-                )
-              } 
-            />
-            <Route path="*" element={<Home isLoggedIn={!!authToken} />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+              <Route path="*" element={<Home isLoggedIn={!!authToken} />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    </GoogleOAuthProvider>
   );
 }
 

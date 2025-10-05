@@ -84,4 +84,48 @@
   background-color: white;
   padding: 1rem;
   border-top: 1px solid #eee;
+}
+
+/* Math Tools Toggle */
+.math-tools-toggle {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid #eee;
+}
+
+.tools-toggle-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.tools-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.tools-toggle-btn:active {
+  transform: translateY(0);
+}
+
+/* Mobile adjustments for new components */
+@media (max-width: 768px) {
+  .math-tools-toggle {
+    padding: 8px;
+  }
+  
+  .tools-toggle-btn {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
 } 

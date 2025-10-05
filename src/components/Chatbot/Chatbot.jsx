@@ -3,9 +3,13 @@ import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognitio
 import axios from 'axios';
 import ChatMessage from '../ChatMessage/ChatMessage.jsx';
 import ChatInput from '../ChatInput/ChatInput.jsx';
+import MathMascot from '../MathMascot/MathMascot.jsx';
+import ProgressTracker from '../ProgressTracker/ProgressTracker.jsx';
+import EnhancedLoading from '../EnhancedLoading/EnhancedLoading.jsx';
+import MathTools from '../MathTools/MathTools.jsx';
 import './Chatbot.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || 'https://mathai-675937690896.us-central1.run.app';
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
@@ -28,6 +32,20 @@ const Chatbot = ({authToken}) => {
   const [transcriptSubmitted, setTranscriptSubmitted] = useState(false);
   const chatEndRef = useRef(null);
   const [conversationContext, setConversationContext] = useState([]);
+  
+  // New state for enhanced features
+  const [showMathTools, setShowMathTools] = useState(false);
+  const [mascotMood, setMascotMood] = useState('happy');
+  const [mascotMessage, setMascotMessage] = useState(null);
+  const [isCelebrating, setIsCelebrating] = useState(false);
+  const [progress, setProgress] = useState({
+    totalQuestions: 0,
+    correctAnswers: 0,
+    currentStreak: 0,
+    level: 1,
+    experience: 0,
+    nextLevelExp: 100
+  });
 
   const {
     transcript,
@@ -99,6 +117,13 @@ const Chatbot = ({authToken}) => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
     setShowSuggestions(false);
+    setMascotMood('thinking');
+
+    // Update progress
+    setProgress(prev => ({
+      ...prev,
+      totalQuestions: prev.totalQuestions + 1
+    }));
 
     try {
       let response;
@@ -147,6 +172,26 @@ const Chatbot = ({authToken}) => {
         sender: 'bot'
       }]);
       setShowSuggestions(isNewQuestion);
+      
+      // Celebrate successful response
+      setMascotMood('celebrating');
+      setIsCelebrating(true);
+      setMascotMessage("Great question! I hope that helps! 🎉");
+      
+      // Update progress for correct answers (simplified logic)
+      setProgress(prev => ({
+        ...prev,
+        correctAnswers: prev.correctAnswers + 1,
+        experience: prev.experience + 10,
+        currentStreak: prev.currentStreak + 1
+      }));
+      
+      setTimeout(() => {
+        setMascotMood('happy');
+        setIsCelebrating(false);
+        setMascotMessage(null);
+      }, 3000);
+      
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = error.response?.data?.error || "Sorry, I had trouble understanding that. Could you try asking again?";
@@ -154,6 +199,13 @@ const Chatbot = ({authToken}) => {
         text: errorMessage,
         sender: 'bot'
       }]);
+      
+      setMascotMood('encouraging');
+      setMascotMessage("Don't worry! Let's try again! 💪");
+      setTimeout(() => {
+        setMascotMood('happy');
+        setMascotMessage(null);
+      }, 2000);
     } finally {
       setIsLoading(false);
     }
@@ -171,10 +223,31 @@ const Chatbot = ({authToken}) => {
       setVoiceInputEnd(true);
       SpeechRecognition.stopListening();
     }, 1000); // Add a delay of 1000ms before stopping the listening
-  }
+  };
+
+  const handleMathToolResult = (toolType, result) => {
+    if (toolType === 'calculation') {
+      handleSubmit(`I calculated: ${result}`, null, true);
+    } else if (toolType === 'drawing') {
+      // For drawing, we could send the image data to the API
+      // For now, just add a message about the drawing
+      handleSubmit("I drew something to help solve this problem!", null, true);
+    }
+    setShowMathTools(false);
+  };
 
   return (
     <div className="chatbot-container">
+      {/* Progress Tracker */}
+      <ProgressTracker 
+        totalQuestions={progress.totalQuestions}
+        correctAnswers={progress.correctAnswers}
+        currentStreak={progress.currentStreak}
+        level={progress.level}
+        experience={progress.experience}
+        nextLevelExp={progress.nextLevelExp}
+      />
+
       <div className="chat-messages">
         <div className="messages-wrapper">
           {messages.map((message, index) => (
@@ -184,7 +257,10 @@ const Chatbot = ({authToken}) => {
             <ChatMessage message={{ text: "Please login to continue", sender: "bot" }} />
           )}
           {isLoading && (
-            <ChatMessage message={{ text: "Thinking...", sender: "bot" }} />
+            <EnhancedLoading 
+              message="Working on your math problem..." 
+              type="thinking"
+            />
           )}
           <div ref={chatEndRef} />
           {showSuggestions && !isLoading && messages.length > 0 && (
@@ -203,6 +279,22 @@ const Chatbot = ({authToken}) => {
         </div>
       </div>
 
+      {/* Math Tools */}
+      <MathTools 
+        onToolResult={handleMathToolResult}
+        isVisible={showMathTools}
+      />
+
+      {/* Math Tools Toggle Button */}
+      <div className="math-tools-toggle">
+        <button 
+          className="tools-toggle-btn"
+          onClick={() => setShowMathTools(!showMathTools)}
+        >
+          {showMathTools ? '🛠️ Hide Tools' : '🛠️ Math Tools'}
+        </button>
+      </div>
+
       <ChatInput
         onSubmit={handleSubmit}
         onVoiceInput={startListening}
@@ -210,6 +302,15 @@ const Chatbot = ({authToken}) => {
         isListening={listening}
         disabled={!authToken}
         showVoiceInput={browserSupportsSpeechRecognition}
+      />
+
+      {/* Math Mascot */}
+      <MathMascot 
+        isThinking={isLoading}
+        isCelebrating={isCelebrating}
+        isEncouraging={mascotMood === 'encouraging'}
+        currentMood={mascotMood}
+        message={mascotMessage}
       />
     </div>
   );

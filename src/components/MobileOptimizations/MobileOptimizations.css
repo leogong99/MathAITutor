@@ -1,0 +1,253 @@
+/* Mobile-specific optimizations */
+.mobile-optimized {
+  /* Ensure touch targets are at least 44px */
+  --touch-target-size: 44px;
+  
+  /* Improve scrolling performance */
+  -webkit-overflow-scrolling: touch;
+  
+  /* Prevent text selection on UI elements */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.mobile-optimized button,
+.mobile-optimized .suggestion-button,
+.mobile-optimized .calc-btn,
+.mobile-optimized .draw-btn,
+.mobile-optimized .tools-toggle-btn {
+  min-height: var(--touch-target-size);
+  min-width: var(--touch-target-size);
+  padding: 12px 16px;
+}
+
+/* Improve input focus on mobile */
+.mobile-optimized input,
+.mobile-optimized textarea {
+  font-size: 16px; /* Prevents zoom on iOS */
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Better spacing for mobile */
+.mobile-optimized .chatbot-container {
+  padding: 8px;
+}
+
+.mobile-optimized .progress-tracker {
+  margin: 8px 0;
+  padding: 12px;
+}
+
+.mobile-optimized .math-tools {
+  margin: 8px 0;
+  padding: 12px;
+}
+
+/* Optimize math expressions for mobile */
+.mobile-optimized .math-expression {
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.mobile-optimized .katex {
+  font-size: 1.2em;
+}
+
+.mobile-optimized .katex-display {
+  margin: 0.8em 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Improve message display on mobile */
+.mobile-optimized .message {
+  max-width: 90%;
+  padding: 16px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.mobile-optimized .message-wrapper {
+  margin: 12px 0;
+}
+
+/* Better mobile navigation */
+.mobile-optimized .nav-links {
+  padding: 16px;
+  gap: 16px;
+}
+
+.mobile-optimized .nav-link {
+  padding: 12px 20px;
+  font-size: 1.1rem;
+}
+
+/* Optimize mascot for mobile */
+.mobile-optimized .math-mascot {
+  bottom: 15px;
+  right: 15px;
+}
+
+.mobile-optimized .mascot-emoji {
+  font-size: 2rem;
+}
+
+.mobile-optimized .mascot-body {
+  font-size: 1.5rem;
+}
+
+/* Improve calculator on mobile */
+.mobile-optimized .calculator-buttons {
+  gap: 12px;
+}
+
+.mobile-optimized .calc-btn {
+  padding: 16px;
+  font-size: 1.3rem;
+}
+
+.mobile-optimized .display-value {
+  font-size: 1.8rem;
+  min-height: 3rem;
+}
+
+/* Better drawing board on mobile */
+.mobile-optimized .drawing-canvas {
+  width: 100%;
+  max-width: 100%;
+  height: 250px;
+  touch-action: none; /* Prevent scrolling while drawing */
+}
+
+.mobile-optimized .drawing-controls {
+  gap: 12px;
+  padding: 8px;
+}
+
+.mobile-optimized .draw-btn {
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  min-height: 44px;
+}
+
+/* Improve loading states on mobile */
+.mobile-optimized .enhanced-loading {
+  padding: 16px;
+  margin: 8px 0;
+}
+
+.mobile-optimized .loading-container {
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+}
+
+.mobile-optimized .icon-wrapper {
+  font-size: 2.5rem;
+}
+
+.mobile-optimized .loading-message {
+  font-size: 1rem;
+}
+
+/* Better suggestions on mobile */
+.mobile-optimized .suggestions {
+  padding: 16px;
+  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mobile-optimized .suggestion-button {
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  min-height: 44px;
+  border-radius: 20px;
+}
+
+/* Improve progress tracker on mobile */
+.mobile-optimized .progress-stats {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.mobile-optimized .stat-item {
+  padding: 12px;
+  text-align: center;
+}
+
+.mobile-optimized .achievement-list {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mobile-optimized .achievement-item {
+  justify-content: center;
+  padding: 8px 16px;
+}
+
+/* Landscape mode optimizations */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-optimized .progress-tracker {
+    margin: 4px 0;
+    padding: 8px;
+  }
+  
+  .mobile-optimized .math-tools {
+    margin: 4px 0;
+    padding: 8px;
+  }
+  
+  .mobile-optimized .math-mascot {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .mobile-optimized .mascot-emoji {
+    font-size: 1.8rem;
+  }
+  
+  .mobile-optimized .mascot-body {
+    font-size: 1.3rem;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .mobile-optimized .math-expression {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  .mobile-optimized .katex {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Dark mode support for mobile */
+@media (prefers-color-scheme: dark) {
+  .mobile-optimized .chatbot-container {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+  
+  .mobile-optimized .message {
+    background-color: #2d2d2d;
+    color: #ffffff;
+  }
+  
+  .mobile-optimized .bot-message {
+    background-color: #2d2d2d;
+    color: #ffffff;
+  }
+  
+  .mobile-optimized .user-message {
+    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
+    color: white;
+  }
+}
