@@ -11,6 +11,8 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [drawingHistory, setDrawingHistory] = useState([]);
   const [historyStep, setHistoryStep] = useState(-1);
+  const [isSendingDrawing, setIsSendingDrawing] = useState(false);
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   // Calculator functions
   const inputNumber = (num) => {
@@ -102,6 +104,9 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     const ctx = canvas.getContext('2d');
     ctx.lineTo(x, y);
     ctx.stroke();
+    
+    // Mark that user has drawn something
+    setHasDrawn(true);
   };
 
   const stopDrawing = () => {
@@ -120,8 +125,12 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Reset canvas background
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     setDrawingHistory([]);
     setHistoryStep(-1);
+    setHasDrawn(false);
   };
 
   const undoDrawing = () => {
@@ -146,8 +155,63 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
 
   const sendDrawingResult = () => {
     const canvas = canvasRef.current;
-    const dataURL = canvas.toDataURL();
-    onToolResult('drawing', dataURL);
+    
+    // Better method to check if there's content on the canvas
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Debug: Log some pixel data to help troubleshoot
+    console.log('Canvas size:', canvas.width, 'x', canvas.height);
+    console.log('First few pixels:', data.slice(0, 20));
+    
+    // Check for any non-transparent pixels (more reliable method)
+    let hasContent = false;
+    let nonTransparentPixels = 0;
+    
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 0) { // Check alpha channel
+        nonTransparentPixels++;
+        hasContent = true;
+      }
+    }
+
+    console.log('Non-transparent pixels found:', nonTransparentPixels);
+
+    // Alternative check: look for any non-zero RGB values
+    if (!hasContent) {
+      let coloredPixels = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) {
+          coloredPixels++;
+          hasContent = true;
+        }
+      }
+      console.log('Colored pixels found:', coloredPixels);
+    }
+
+    if (!hasContent) {
+      alert(`Please draw something before sending! 
+      
+Debug info:
+- Canvas size: ${canvas.width}x${canvas.height}
+- Non-transparent pixels: ${nonTransparentPixels}
+- Try drawing with a darker color or thicker strokes.`);
+      return;
+    }
+
+    setIsSendingDrawing(true);
+
+    // Convert canvas to blob for proper image upload
+    canvas.toBlob((blob) => {
+      if (blob) {
+        console.log('Drawing blob created, size:', blob.size, 'bytes');
+        // Create a File object from the blob
+        const file = new File([blob], 'drawing.png', { type: 'image/png' });
+        onToolResult('drawing', file);
+        setIsSendingDrawing(false);
+      }
+    }, 'image/png');
   };
 
   const sendCalculatorResult = () => {
@@ -158,10 +222,39 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
+      // Set up drawing properties
       ctx.strokeStyle = '#4CAF50';
       ctx.lineWidth = 3;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+      
+      // Ensure the canvas is ready for drawing
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Set up touch events for mobile
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        startDrawing({ clientX: x, clientY: y });
+      });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        draw({ clientX: x, clientY: y });
+      });
+      
+      canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        stopDrawing();
+      });
     }
   }, []);
 
@@ -232,8 +325,12 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
               <button className="draw-btn clear" onClick={clearDrawing}>
                 🗑️ Clear
               </button>
-              <button className="draw-btn send" onClick={sendDrawingResult}>
-                📤 Send
+              <button 
+                className="draw-btn send" 
+                onClick={sendDrawingResult}
+                disabled={isSendingDrawing || !hasDrawn}
+              >
+                {isSendingDrawing ? '📤 Sending...' : hasDrawn ? '📤 Send Drawing' : '📤 Draw First'}
               </button>
             </div>
             <canvas
@@ -248,6 +345,9 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
             />
             <div className="drawing-instructions">
               <p>Draw your math work here! Use your mouse or touch to draw.</p>
+              <p className="drawing-tips">
+                💡 Tip: Draw equations, diagrams, or show your work step by step
+              </p>
             </div>
           </div>
         )}

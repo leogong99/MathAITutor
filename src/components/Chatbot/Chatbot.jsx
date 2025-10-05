@@ -229,9 +229,8 @@ const Chatbot = ({authToken}) => {
     if (toolType === 'calculation') {
       handleSubmit(`I calculated: ${result}`, null, true);
     } else if (toolType === 'drawing') {
-      // For drawing, we could send the image data to the API
-      // For now, just add a message about the drawing
-      handleSubmit("I drew something to help solve this problem!", null, true);
+      // Send the drawing as an image to the backend
+      handleSubmit("Here's my drawing to help solve this problem:", result, true);
     }
     setShowMathTools(false);
   };

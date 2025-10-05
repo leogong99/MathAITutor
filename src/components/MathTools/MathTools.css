@@ -190,6 +190,12 @@
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  opacity: 0.6;
+}
+
+.draw-btn.send:disabled {
+  background: #e0e0e0;
+  color: #999;
 }
 
 .draw-btn.clear {
@@ -221,6 +227,13 @@
   font-size: 0.9rem;
   font-style: italic;
   font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+}
+
+.drawing-tips {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: #4CAF50;
+  font-weight: bold;
 }
 
 /* Mobile Responsiveness */
