@@ -21,13 +21,15 @@ function App() {
   }, []);
 
   const responseMessage = (response) => {
+    console.log('Google OAuth response:', response);
     const idToken = response.credential;
     localStorage.setItem('authToken', idToken);
     setAuthToken(idToken);
   };
 
   const errorMessage = (error) => {
-    console.error('Login error:', error);
+    console.error('Google OAuth error:', error);
+    alert(`Google OAuth Error: ${error.error || 'Unknown error'}\n\nPlease check your Google OAuth configuration.`);
   };
 
   const handleLogout = () => {
@@ -49,8 +51,25 @@ function App() {
     );
   }
 
+  // Check if Google Client ID is configured
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  
+  if (!googleClientId) {
+    return (
+      <div className="error-screen">
+        <div className="error-content">
+          <h2>⚠️ Configuration Error</h2>
+          <p>Google OAuth Client ID is not configured.</p>
+          <p>Please create a <code>.env</code> file with:</p>
+          <pre>REACT_APP_GOOGLE_CLIENT_ID=your_actual_client_id_here</pre>
+          <p>Get your Client ID from <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || 'your-client-id-here'}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <Router>
         <div className="App">
           <MobileOptimizations />
