@@ -7,7 +7,7 @@ import ChatMessage from '../ChatMessage/ChatMessage.jsx';
 import ChatInput from '../ChatInput/ChatInput.jsx';
 import './Chatbot.css';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mathai-675937690896.us-central1.run.app';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
