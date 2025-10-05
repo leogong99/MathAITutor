@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef, useEffect } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import axios from 'axios';
@@ -5,7 +7,7 @@ import ChatMessage from '../ChatMessage/ChatMessage.jsx';
 import ChatInput from '../ChatInput/ChatInput.jsx';
 import './Chatbot.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://mathai-675937690896.us-central1.run.app';
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
@@ -64,7 +66,7 @@ const Chatbot = ({authToken}) => {
       handleSubmit(transcript);
       setTranscriptSubmitted(true);
     }
-  }, [transcript, voiceInputEnd, transcriptSubmitted, authToken]);
+  }, [transcript, voiceInputEnd, transcriptSubmitted, authToken, handleSubmit]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -125,31 +127,45 @@ const Chatbot = ({authToken}) => {
             ...headers,
             'Content-Type': 'multipart/form-data'
           },
-        })
-        .catch(err => {
-          console.error('Service call error:', err);
-          return;
         });
       } else {
         console.log("testing", `${API_URL}/api/chat`);
         response = await axios.post(`${API_URL}/api/chat`,{
           message: text,
           context: conversationContext.slice(-3)
-        }, {headers})
-        .catch(err => {
-          console.error('Service call error:', err);
-          return;
-        });
+        }, {headers});
       }
       
-      setMessages(prev => [...prev, {
-        text: response.data.message,
-        sender: 'bot'
-      }]);
-      setShowSuggestions(isNewQuestion);
+      if (response && response.data && response.data.message) {
+        setMessages(prev => [...prev, {
+          text: response.data.message,
+          sender: 'bot'
+        }]);
+        setShowSuggestions(isNewQuestion);
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Error:', error);
-      const errorMessage = error.response?.data?.error || "Sorry, I had trouble understanding that. Could you try asking again?";
+      let errorMessage;
+      
+      if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+        errorMessage = `I'm having trouble connecting to the server. Please make sure the backend API is running on ${API_URL}. 
+
+For now, I can help you with basic math concepts! Try asking me about:
+• "What is 2 + 2?"
+• "Explain algebra"
+• "How do I solve quadratic equations?"
+
+Note: Full AI functionality requires the backend API to be running.`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message === 'Invalid response from server') {
+        errorMessage = "The server returned an unexpected response. Please try again.";
+      } else {
+        errorMessage = "Sorry, I had trouble understanding that. Could you try asking again?";
+      }
+      
       setMessages(prev => [...prev, {
         text: errorMessage,
         sender: 'bot'

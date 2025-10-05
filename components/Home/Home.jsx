@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import './Home.css';
 
 const Home = ({ isLoggedIn }) => {
@@ -42,7 +42,7 @@ const Home = ({ isLoggedIn }) => {
       </div>
 
       <div className="cta">
-        <Link to="/chat" className={`start-button ${!isLoggedIn ? 'disabled' : ''}`}>
+        <Link href="/chat" className={`start-button ${!isLoggedIn ? 'disabled' : ''}`}>
           {isLoggedIn ? 'Start Learning' : 'Login to Start'}
         </Link>
       </div>

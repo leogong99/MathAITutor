@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useRef } from 'react';
 import ImageUpload from '../ImageUpload/ImageUpload';
 import './ChatInput.css';
