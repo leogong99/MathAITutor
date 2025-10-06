@@ -53,20 +53,6 @@ function App() {
 
   // Check if Google Client ID is configured
   const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-  
-  if (!googleClientId) {
-    return (
-      <div className="error-screen">
-        <div className="error-content">
-          <h2>⚠️ Configuration Error</h2>
-          <p>Google OAuth Client ID is not configured.</p>
-          <p>Please create a <code>.env</code> file with:</p>
-          <pre>REACT_APP_GOOGLE_CLIENT_ID=your_actual_client_id_here</pre>
-          <p>Get your Client ID from <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer">Google Cloud Console</a></p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <GoogleOAuthProvider clientId={googleClientId}>

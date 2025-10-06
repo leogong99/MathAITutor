@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import axios from 'axios';
 import ChatMessage from '../ChatMessage/ChatMessage.jsx';
@@ -9,7 +9,7 @@ import EnhancedLoading from '../EnhancedLoading/EnhancedLoading.jsx';
 import MathTools from '../MathTools/MathTools.jsx';
 import './Chatbot.css';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://mathai-675937690896.us-central1.run.app';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
 const FOLLOW_UP_SUGGESTIONS = {
   default: [
@@ -77,13 +77,6 @@ const Chatbot = ({authToken}) => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    if (transcript && voiceInputEnd && !transcriptSubmitted) {
-      handleSubmit(transcript);
-      setTranscriptSubmitted(true);
-    }
-  }, [transcript, voiceInputEnd, transcriptSubmitted, authToken]);
-
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -100,7 +93,7 @@ const Chatbot = ({authToken}) => {
     setShowSuggestions(false);
   };
 
-  const handleSubmit = async (text, image, isNewQuestion = true) => {
+  const handleSubmit = useCallback(async (text, image, isNewQuestion = true) => {
     // Update conversation context
     if (!text.startsWith('Previous context:')) {
       setConversationContext(prev => [...prev, text]);
@@ -145,6 +138,13 @@ const Chatbot = ({authToken}) => {
         }
         
         console.log('Sending image:', image);
+        console.log('Message with image:', text);
+        console.log('FormData contents:', {
+          image: image.name || 'drawing.png',
+          message: text,
+          imageType: image.type,
+          imageSize: image.size
+        });
         response = await axios.post(`${API_URL}/api/chat/with-image`, formData, {
           headers: {
             ...headers,
@@ -167,6 +167,7 @@ const Chatbot = ({authToken}) => {
         });
       }
       
+      console.log('API Response:', response?.data);
       setMessages(prev => [...prev, {
         text: response.data.message,
         sender: 'bot'
@@ -209,7 +210,14 @@ const Chatbot = ({authToken}) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [authToken, conversationContext]);
+
+  useEffect(() => {
+    if (transcript && voiceInputEnd && !transcriptSubmitted) {
+      handleSubmit(transcript);
+      setTranscriptSubmitted(true);
+    }
+  }, [transcript, voiceInputEnd, transcriptSubmitted, handleSubmit]);
 
   const startListening = () => {
     setVoiceInputEnd(false);
@@ -229,8 +237,8 @@ const Chatbot = ({authToken}) => {
     if (toolType === 'calculation') {
       handleSubmit(`I calculated: ${result}`, null, true);
     } else if (toolType === 'drawing') {
-      // Send the drawing as an image to the backend
-      handleSubmit("Here's my drawing to help solve this problem:", result, true);
+      // Send the drawing as an image to the backend with a math-specific message
+      handleSubmit("I drew a handwritten math equation. Please carefully read the numbers and symbols in this image and help me solve the math problem step by step:", result, true);
     }
     setShowMathTools(false);
   };

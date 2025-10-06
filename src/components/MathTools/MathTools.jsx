@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import './MathTools.css';
 
 const MathTools = ({ onToolResult, isVisible = false }) => {
@@ -81,7 +81,7 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
   };
 
   // Drawing functions
-  const startDrawing = (e) => {
+  const startDrawing = useCallback((e) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -91,9 +91,9 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.moveTo(x, y);
-  };
+  }, []);
 
-  const draw = (e) => {
+  const draw = useCallback((e) => {
     if (!isDrawing) return;
     
     const canvas = canvasRef.current;
@@ -107,9 +107,9 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     
     // Mark that user has drawn something
     setHasDrawn(true);
-  };
+  }, [isDrawing]);
 
-  const stopDrawing = () => {
+  const stopDrawing = useCallback(() => {
     if (isDrawing) {
       setIsDrawing(false);
       const canvas = canvasRef.current;
@@ -119,7 +119,7 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
       setDrawingHistory(prev => [...prev.slice(0, historyStep + 1), imageData]);
       setHistoryStep(prev => prev + 1);
     }
-  };
+  }, [isDrawing, historyStep]);
 
   const clearDrawing = () => {
     const canvas = canvasRef.current;
@@ -151,6 +151,47 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
       ctx.putImageData(drawingHistory[historyStep + 1], 0, 0);
       setHistoryStep(prev => prev + 1);
     }
+  };
+
+  const downloadDrawing = () => {
+    const canvas = canvasRef.current;
+    
+    // Check if there's content on the canvas
+    const ctx = canvas.getContext('2d');
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+    
+    // Check for any non-transparent pixels
+    let hasContent = false;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 0) {
+        hasContent = true;
+        break;
+      }
+    }
+
+    // Alternative check: look for any non-zero RGB values
+    if (!hasContent) {
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i] > 0 || data[i + 1] > 0 || data[i + 2] > 0) {
+          hasContent = true;
+          break;
+        }
+      }
+    }
+
+    if (!hasContent) {
+      alert('Please draw something before downloading!');
+      return;
+    }
+
+    // Create download link
+    const link = document.createElement('a');
+    link.download = `math-drawing-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const sendDrawingResult = () => {
@@ -202,10 +243,23 @@ Debug info:
 
     setIsSendingDrawing(true);
 
-    // Convert canvas to blob for proper image upload
-    canvas.toBlob((blob) => {
+    // Create a higher resolution canvas for better OCR
+    const scaleFactor = 2; // Double the resolution
+    const highResCanvas = document.createElement('canvas');
+    const highResCtx = highResCanvas.getContext('2d');
+    
+    highResCanvas.width = canvas.width * scaleFactor;
+    highResCanvas.height = canvas.height * scaleFactor;
+    
+    // Scale up the drawing for better OCR recognition
+    highResCtx.scale(scaleFactor, scaleFactor);
+    highResCtx.drawImage(canvas, 0, 0);
+    
+    // Convert high-res canvas to blob for proper image upload
+    highResCanvas.toBlob((blob) => {
       if (blob) {
-        console.log('Drawing blob created, size:', blob.size, 'bytes');
+        console.log('High-res drawing blob created, size:', blob.size, 'bytes');
+        console.log('High-res canvas size:', highResCanvas.width, 'x', highResCanvas.height);
         // Create a File object from the blob
         const file = new File([blob], 'drawing.png', { type: 'image/png' });
         onToolResult('drawing', file);
@@ -218,45 +272,61 @@ Debug info:
     onToolResult('calculation', calculatorDisplay);
   };
 
+  // Initialize canvas with white background (only once)
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext('2d');
-      // Set up drawing properties
-      ctx.strokeStyle = '#4CAF50';
-      ctx.lineWidth = 3;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      // Set up drawing properties for better OCR recognition
+      ctx.strokeStyle = '#000000'; // Black color for better contrast
+      ctx.lineWidth = 4; // Thicker lines for better recognition
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       
-      // Ensure the canvas is ready for drawing
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      
       // Set up touch events for mobile
-      canvas.addEventListener('touchstart', (e) => {
+      const handleTouchStart = (e) => {
         e.preventDefault();
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
         const x = touch.clientX - rect.left;
         const y = touch.clientY - rect.top;
         startDrawing({ clientX: x, clientY: y });
-      });
+      };
       
-      canvas.addEventListener('touchmove', (e) => {
+      const handleTouchMove = (e) => {
         e.preventDefault();
         const touch = e.touches[0];
         const rect = canvas.getBoundingClientRect();
         const x = touch.clientX - rect.left;
         const y = touch.clientY - rect.top;
         draw({ clientX: x, clientY: y });
-      });
+      };
       
-      canvas.addEventListener('touchend', (e) => {
+      const handleTouchEnd = (e) => {
         e.preventDefault();
         stopDrawing();
-      });
+      };
+      
+      canvas.addEventListener('touchstart', handleTouchStart);
+      canvas.addEventListener('touchmove', handleTouchMove);
+      canvas.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        canvas.removeEventListener('touchstart', handleTouchStart);
+        canvas.removeEventListener('touchmove', handleTouchMove);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      };
     }
-  }, []);
+  }, [startDrawing, draw, stopDrawing]);
 
   if (!isVisible) return null;
 
@@ -326,6 +396,13 @@ Debug info:
                 🗑️ Clear
               </button>
               <button 
+                className="draw-btn download" 
+                onClick={downloadDrawing}
+                disabled={!hasDrawn}
+              >
+                💾 Download
+              </button>
+              <button 
                 className="draw-btn send" 
                 onClick={sendDrawingResult}
                 disabled={isSendingDrawing || !hasDrawn}
@@ -341,12 +418,21 @@ Debug info:
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
-              onMouseLeave={stopDrawing}
+              onMouseLeave={() => {
+                if (isDrawing) {
+                  stopDrawing();
+                }
+              }}
             />
             <div className="drawing-instructions">
               <p>Draw your math work here! Use your mouse or touch to draw.</p>
               <p className="drawing-tips">
-                💡 Tip: Draw equations, diagrams, or show your work step by step
+                💡 Tips for better recognition:
+                <br />• Write numbers and symbols clearly and large
+                <br />• Use thick, dark strokes
+                <br />• Space characters well apart
+                <br />• Write &quot;1&quot; with a clear vertical line
+                <br />• Make &quot;+&quot; and &quot;=&quot; distinct from other symbols
               </p>
             </div>
           </div>

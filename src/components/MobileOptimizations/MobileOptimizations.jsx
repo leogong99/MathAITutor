@@ -3,26 +3,18 @@ import './MobileOptimizations.css';
 
 const MobileOptimizations = () => {
   const [isMobile, setIsMobile] = useState(false);
-  const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    const checkOrientation = () => {
-      setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
-    };
-
     checkMobile();
-    checkOrientation();
 
     window.addEventListener('resize', checkMobile);
-    window.addEventListener('orientationchange', checkOrientation);
 
     return () => {
       window.removeEventListener('resize', checkMobile);
-      window.removeEventListener('orientationchange', checkOrientation);
     };
   }, []);
 

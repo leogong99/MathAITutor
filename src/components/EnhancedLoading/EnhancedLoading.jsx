@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import './EnhancedLoading.css';
 
 const EnhancedLoading = ({ 
@@ -10,21 +10,21 @@ const EnhancedLoading = ({
   const [dots, setDots] = useState('');
   const [currentMessage, setCurrentMessage] = useState(message);
 
-  const thinkingMessages = [
+  const thinkingMessages = useMemo(() => [
     "Let me think about this...",
     "Working on your math problem...",
     "Calculating the solution...",
     "Almost there...",
     "Just a moment more..."
-  ];
+  ], []);
 
-  const celebratingMessages = [
+  const celebratingMessages = useMemo(() => [
     "Great job! 🎉",
     "Excellent work! ⭐",
     "You're doing amazing! 🌟",
     "Keep it up! 💪",
     "Fantastic! 🚀"
-  ];
+  ], []);
 
   useEffect(() => {
     if (type === 'thinking') {
@@ -43,7 +43,7 @@ const EnhancedLoading = ({
     } else if (type === 'celebrating') {
       setCurrentMessage(celebratingMessages[Math.floor(Math.random() * celebratingMessages.length)]);
     }
-  }, [type]);
+  }, [type, thinkingMessages, celebratingMessages]);
 
   const getLoadingIcon = () => {
     switch (type) {

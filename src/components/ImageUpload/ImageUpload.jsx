@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './ImageUpload.css';
 
 const ImageUpload = ({ onImageSelect, isUploading, selectedImage, onClearImage, fileInputRef, disabled }) => {
