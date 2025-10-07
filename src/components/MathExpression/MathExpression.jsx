@@ -24,14 +24,17 @@ const MathExpression = ({ text }) => {
           const math = part.slice(2, -2).replace(/text{/g, '\\text{');
           return <InlineMath key={index} math={math} />;
         } else {
-          // Replace any remaining escaped characters
-          const cleanText = part
-            .replace(/\\,/g, ',')
-            .replace(/\\text/g, 'text')
-            .replace(/\\,/g, ',')
-            .replace(/\\,/g, ',')
-            .replace(/\\,/g, ',');
-          return <pre key={index}>{cleanText}</pre>;
+          // Handle regular text - split by newlines and render each line
+          const lines = part.split('\n');
+          return (
+            <div key={index}>
+              {lines.map((line, lineIndex) => (
+                <div key={lineIndex} style={{ marginBottom: line.trim() ? '0.5em' : '0' }}>
+                  {line.trim() || '\u00A0'} {/* Non-breaking space for empty lines */}
+                </div>
+              ))}
+            </div>
+          );
         }
       })}
     </div>
