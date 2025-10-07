@@ -4,6 +4,7 @@ import './MathTools.css';
 const MathTools = ({ onToolResult, isVisible = false }) => {
   const [activeTool, setActiveTool] = useState('calculator');
   const [calculatorDisplay, setCalculatorDisplay] = useState('0');
+  const [equationDisplay, setEquationDisplay] = useState('');
   const [previousValue, setPreviousValue] = useState(null);
   const [operation, setOperation] = useState(null);
   const [waitingForOperand, setWaitingForOperand] = useState(false);
@@ -19,8 +20,28 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     if (waitingForOperand) {
       setCalculatorDisplay(String(num));
       setWaitingForOperand(false);
+      // Update equation display with the new number
+      setEquationDisplay(equationDisplay + String(num));
     } else {
-      setCalculatorDisplay(calculatorDisplay === '0' ? String(num) : calculatorDisplay + num);
+      const newDisplay = calculatorDisplay === '0' ? String(num) : calculatorDisplay + num;
+      setCalculatorDisplay(newDisplay);
+      // Update equation display
+      if (equationDisplay === '') {
+        setEquationDisplay(String(num));
+      } else {
+        // Replace the last number in the equation
+        const lastOperatorIndex = Math.max(
+          equationDisplay.lastIndexOf('+'),
+          equationDisplay.lastIndexOf('-'),
+          equationDisplay.lastIndexOf('×'),
+          equationDisplay.lastIndexOf('÷')
+        );
+        if (lastOperatorIndex === -1) {
+          setEquationDisplay(String(num));
+        } else {
+          setEquationDisplay(equationDisplay.substring(0, lastOperatorIndex + 1) + newDisplay);
+        }
+      }
     }
   };
 
@@ -29,12 +50,16 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
 
     if (previousValue === null) {
       setPreviousValue(inputValue);
+      // Add the operation to equation display
+      setEquationDisplay(equationDisplay + nextOperation);
     } else if (operation) {
       const currentValue = previousValue || 0;
       const newValue = calculate(currentValue, inputValue, operation);
 
       setCalculatorDisplay(String(newValue));
       setPreviousValue(newValue);
+      // Update equation display with the result and new operation
+      setEquationDisplay(String(newValue) + nextOperation);
     }
 
     setWaitingForOperand(true);
@@ -58,6 +83,8 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     if (previousValue !== null && operation) {
       const newValue = calculate(previousValue, inputValue, operation);
       setCalculatorDisplay(String(newValue));
+      // Update equation display to show the complete equation with result
+      setEquationDisplay(equationDisplay + '=' + String(newValue));
       setPreviousValue(null);
       setOperation(null);
       setWaitingForOperand(true);
@@ -66,6 +93,7 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
 
   const clearCalculator = () => {
     setCalculatorDisplay('0');
+    setEquationDisplay('');
     setPreviousValue(null);
     setOperation(null);
     setWaitingForOperand(false);
@@ -75,8 +103,28 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
     if (waitingForOperand) {
       setCalculatorDisplay('0.');
       setWaitingForOperand(false);
+      // Update equation display with the decimal
+      setEquationDisplay(equationDisplay + '0.');
     } else if (calculatorDisplay.indexOf('.') === -1) {
-      setCalculatorDisplay(calculatorDisplay + '.');
+      const newDisplay = calculatorDisplay + '.';
+      setCalculatorDisplay(newDisplay);
+      // Update equation display
+      if (equationDisplay === '') {
+        setEquationDisplay('0.');
+      } else {
+        // Replace the last number in the equation
+        const lastOperatorIndex = Math.max(
+          equationDisplay.lastIndexOf('+'),
+          equationDisplay.lastIndexOf('-'),
+          equationDisplay.lastIndexOf('×'),
+          equationDisplay.lastIndexOf('÷')
+        );
+        if (lastOperatorIndex === -1) {
+          setEquationDisplay(newDisplay);
+        } else {
+          setEquationDisplay(equationDisplay.substring(0, lastOperatorIndex + 1) + newDisplay);
+        }
+      }
     }
   };
 
@@ -289,7 +337,9 @@ Debug info:
   };
 
   const sendCalculatorResult = () => {
-    onToolResult('calculation', calculatorDisplay);
+    // Send the equation if it exists, otherwise send the current display
+    const resultToSend = equationDisplay || calculatorDisplay;
+    onToolResult('calculation', resultToSend);
   };
 
   // Initialize canvas with white background (only once)
@@ -374,6 +424,7 @@ Debug info:
         {activeTool === 'calculator' && (
           <div className="calculator">
             <div className="calculator-display">
+              <div className="equation-display">{equationDisplay || '0'}</div>
               <div className="display-value">{calculatorDisplay}</div>
             </div>
             <div className="calculator-buttons">
