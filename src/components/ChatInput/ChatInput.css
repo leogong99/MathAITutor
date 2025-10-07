@@ -7,6 +7,9 @@
   border-top: 1px solid #e9ecef;
   border-radius: 12px 12px 0 0;
   box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .input-container {

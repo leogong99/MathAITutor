@@ -31,7 +31,6 @@ const Chatbot = ({authToken}) => {
   const [voiceInputEnd, setVoiceInputEnd] = useState(false);
   const [transcriptSubmitted, setTranscriptSubmitted] = useState(false);
   const chatEndRef = useRef(null);
-  const [conversationContext, setConversationContext] = useState([]);
   
   // New state for enhanced features
   const [showMathTools, setShowMathTools] = useState(false);
@@ -46,6 +45,7 @@ const Chatbot = ({authToken}) => {
     experience: 0,
     nextLevelExp: 100
   });
+  const [showNewThreadConfirm, setShowNewThreadConfirm] = useState(false);
 
   const {
     transcript,
@@ -82,23 +82,54 @@ const Chatbot = ({authToken}) => {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    // Get the last question and its response
-    const recentContext = messages
-      .slice(-2) // Get last two messages (user question and bot response)
-      .map(msg => msg.text)
-      .join('\n');
-
-    const contextualizedQuestion = `Previous context:\n${recentContext}\n\nFollow-up request: ${suggestion}`;
-    handleSubmit(contextualizedQuestion, null, false);
+    // Use the suggestion directly - context will be handled automatically
+    handleSubmit(suggestion, null, false);
     setShowSuggestions(false);
   };
 
-  const handleSubmit = useCallback(async (text, image, isNewQuestion = true) => {
-    // Update conversation context
-    if (!text.startsWith('Previous context:')) {
-      setConversationContext(prev => [...prev, text]);
-    }
+  const startNewThread = () => {
+    // Reset all conversation state
+    setMessages([
+      {
+        text: "👋 Hi! I'm Math Buddy, your personal math tutor!",
+        sender: 'bot'
+      },
+      {
+        text: "I can help you with any math problem. You can type your question or upload an image of the problem.",
+        sender: 'bot'
+      },
+      {
+        text: "What would you like to learn today?",
+        sender: 'bot'
+      }
+    ]);
+    setShowSuggestions(false);
+    setShowMathTools(false);
+    setMascotMood('happy');
+    setMascotMessage(null);
+    setIsCelebrating(false);
+    setShowNewThreadConfirm(false);
+    
+    // Reset progress for new thread
+    setProgress(prev => ({
+      ...prev,
+      totalQuestions: 0,
+      correctAnswers: 0,
+      currentStreak: 0
+    }));
+  };
 
+  const handleNewThreadClick = () => {
+    // Only show confirmation if there are messages beyond the welcome messages
+    if (messages.length > 3) {
+      setShowNewThreadConfirm(true);
+    } else {
+      startNewThread();
+    }
+  };
+
+  const handleSubmit = useCallback(async (text, image, isNewQuestion = true) => {
+    // Create user message for display
     const userMessage = {
       text: text.startsWith('Previous context:') 
         ? text.split('\n\nFollow-up request: ')[1] // Show only the follow-up part to user
@@ -129,6 +160,37 @@ const Chatbot = ({authToken}) => {
         Authorization: `Bearer ${authToken}`
       };
 
+      // Build comprehensive conversation context
+      const buildContext = () => {
+        const recentMessages = messages.slice(-10); // Get last 10 messages for context
+        const contextMessages = [];
+        
+        recentMessages.forEach((msg) => {
+          if (msg.sender === 'user') {
+            contextMessages.push({
+              role: 'user',
+              content: msg.text,
+              image: msg.image ? 'User uploaded an image' : undefined
+            });
+          } else if (msg.sender === 'bot') {
+            contextMessages.push({
+              role: 'assistant',
+              content: msg.text
+            });
+          }
+        });
+        
+        // Add current message
+        contextMessages.push({
+          role: 'user',
+          content: text,
+          image: image ? 'User uploaded an image' : undefined
+        });
+        
+        return contextMessages;
+      };
+
+      const contextMessages = buildContext();
 
       if (image) {
         const formData = new FormData();
@@ -136,15 +198,15 @@ const Chatbot = ({authToken}) => {
         if (text) {
           formData.append('message', text);
         }
+        // Add context to form data
+        formData.append('context', JSON.stringify(contextMessages.slice(0, -1))); // Exclude current message
         
-        console.log('Sending image:', image);
-        console.log('Message with image:', text);
-        console.log('FormData contents:', {
+        console.log('Sending image with context:', {
           image: image.name || 'drawing.png',
           message: text,
-          imageType: image.type,
-          imageSize: image.size
+          context: contextMessages.slice(0, -1)
         });
+        
         response = await axios.post(`${API_URL}/api/chat/with-image`, formData, {
           headers: {
             ...headers,
@@ -156,10 +218,14 @@ const Chatbot = ({authToken}) => {
           return;
         });
       } else {
-        console.log("testing", `${API_URL}/api/chat`);
+        console.log("Sending message with context:", {
+          message: text,
+          context: contextMessages.slice(0, -1) // Exclude current message
+        });
+        
         response = await axios.post(`${API_URL}/api/chat`,{
           message: text,
-          context: conversationContext.slice(-3)
+          context: contextMessages.slice(0, -1) // Send previous context
         }, {headers})
         .catch(err => {
           console.error('Service call error:', err);
@@ -168,10 +234,13 @@ const Chatbot = ({authToken}) => {
       }
       
       console.log('API Response:', response?.data);
-      setMessages(prev => [...prev, {
+      
+      const botMessage = {
         text: response.data.message,
         sender: 'bot'
-      }]);
+      };
+      
+      setMessages(prev => [...prev, botMessage]);
       setShowSuggestions(isNewQuestion);
       
       // Celebrate successful response
@@ -210,7 +279,7 @@ const Chatbot = ({authToken}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [authToken, conversationContext]);
+  }, [authToken, messages]);
 
   useEffect(() => {
     if (transcript && voiceInputEnd && !transcriptSubmitted) {
@@ -255,6 +324,7 @@ const Chatbot = ({authToken}) => {
         nextLevelExp={progress.nextLevelExp}
       />
 
+
       <div className="chat-messages">
         <div className="messages-wrapper">
           {messages.map((message, index) => (
@@ -276,7 +346,7 @@ const Chatbot = ({authToken}) => {
                 <button
                   key={index}
                   className="suggestion-button"
-                  onClick={() => handleSuggestionClick(`With above problem, ${suggestion}`)}
+                  onClick={() => handleSuggestionClick(suggestion)}
                 >
                   {suggestion}
                 </button>
@@ -302,14 +372,27 @@ const Chatbot = ({authToken}) => {
         </button>
       </div>
 
-      <ChatInput
-        onSubmit={handleSubmit}
-        onVoiceInput={startListening}
-        endVoiceInput={endListening}
-        isListening={listening}
-        disabled={!authToken}
-        showVoiceInput={browserSupportsSpeechRecognition}
-      />
+      <div className="input-container">
+        <ChatInput
+          onSubmit={handleSubmit}
+          onVoiceInput={startListening}
+          endVoiceInput={endListening}
+          isListening={listening}
+          disabled={!authToken}
+          showVoiceInput={browserSupportsSpeechRecognition}
+        />
+        
+        {/* New Thread Button - positioned under chat input on the left */}
+        <div className="new-thread-container">
+          <button 
+            className="new-thread-button"
+            onClick={handleNewThreadClick}
+            title="Start a new conversation"
+          >
+            🆕 New Thread
+          </button>
+        </div>
+      </div>
 
       {/* Math Mascot */}
       <MathMascot 
@@ -319,6 +402,30 @@ const Chatbot = ({authToken}) => {
         currentMood={mascotMood}
         message={mascotMessage}
       />
+
+      {/* New Thread Confirmation Modal */}
+      {showNewThreadConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Start New Thread?</h3>
+            <p>This will clear the current conversation and start fresh. Your progress will be reset for this session.</p>
+            <div className="modal-buttons">
+              <button 
+                className="modal-button cancel"
+                onClick={() => setShowNewThreadConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button 
+                className="modal-button confirm"
+                onClick={startNewThread}
+              >
+                Start New Thread
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
