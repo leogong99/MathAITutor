@@ -185,10 +185,26 @@ const MathTools = ({ onToolResult, isVisible = false }) => {
       return;
     }
 
+    // Create high-resolution version for download with white background
+    const scaleFactor = 2;
+    const highResCanvas = document.createElement('canvas');
+    const highResCtx = highResCanvas.getContext('2d');
+    
+    highResCanvas.width = canvas.width * scaleFactor;
+    highResCanvas.height = canvas.height * scaleFactor;
+    
+    // Ensure white background for the high-res canvas
+    highResCtx.fillStyle = 'white';
+    highResCtx.fillRect(0, 0, highResCanvas.width, highResCanvas.height);
+    
+    // Scale up the drawing
+    highResCtx.scale(scaleFactor, scaleFactor);
+    highResCtx.drawImage(canvas, 0, 0);
+    
     // Create download link
     const link = document.createElement('a');
     link.download = `math-drawing-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.href = highResCanvas.toDataURL('image/png');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -250,6 +266,10 @@ Debug info:
     
     highResCanvas.width = canvas.width * scaleFactor;
     highResCanvas.height = canvas.height * scaleFactor;
+    
+    // Ensure white background for the high-res canvas
+    highResCtx.fillStyle = 'white';
+    highResCtx.fillRect(0, 0, highResCanvas.width, highResCanvas.height);
     
     // Scale up the drawing for better OCR recognition
     highResCtx.scale(scaleFactor, scaleFactor);

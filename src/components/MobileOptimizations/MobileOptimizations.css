@@ -229,25 +229,4 @@
   }
 }
 
-/* Dark mode support for mobile */
-@media (prefers-color-scheme: dark) {
-  .mobile-optimized .chatbot-container {
-    background-color: #1a1a1a;
-    color: #ffffff;
-  }
-  
-  .mobile-optimized .message {
-    background-color: #2d2d2d;
-    color: #ffffff;
-  }
-  
-  .mobile-optimized .bot-message {
-    background-color: #2d2d2d;
-    color: #ffffff;
-  }
-  
-  .mobile-optimized .user-message {
-    background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%);
-    color: white;
-  }
-}
+/* Dark mode support for mobile - removed to maintain consistent light theme */
